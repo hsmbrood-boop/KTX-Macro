@@ -3,6 +3,5 @@ dist/
 __pycache__/
 *.pyc
 *.pyo
-*.spec
 *.egg-info/
 .env
