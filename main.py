@@ -133,6 +133,7 @@ class KTXMacroApp:
         self._btn_photos = {}
         self._img_buttons = {}
         self._active_blink_frame = None
+        self._active_blink_btn = None
         self._blink_job = None
         self._blink_state = False
 
@@ -208,8 +209,8 @@ class KTXMacroApp:
                             bg=START_BG, fg='white',
                             activebackground='#1976d2',
                             activeforeground='white',
-                            relief='flat', cursor='hand2',
-                            command=lambda c=cmd, f=border_f: self._on_mode_btn(c, f))
+                            relief='flat', cursor='hand2')
+            btn.configure(command=lambda c=cmd, f=border_f, b=btn: self._on_mode_btn(c, f, b))
             btn.pack(fill='both', expand=True)
 
             for grid_row, col, prefix, n in items:
@@ -400,11 +401,14 @@ class KTXMacroApp:
             t.start()
             self._start_blink()
         else:
+            self._reset_blink_ui()
             self._active_blink_frame = None
+            self._active_blink_btn = None
             self._set_status('범위 지정 취소됨.')
 
-    def _on_mode_btn(self, cmd, border_frame):
+    def _on_mode_btn(self, cmd, border_frame, btn=None):
         self._active_blink_frame = border_frame
+        self._active_blink_btn = btn
         cmd()
 
     def start_region_select_3(self):
@@ -440,30 +444,53 @@ class KTXMacroApp:
 
     def _do_blink(self):
         if not self._macro_running or self._active_blink_frame is None:
-            if self._active_blink_frame:
-                try:
-                    self._active_blink_frame.configure(bg=BG)
-                except Exception:
-                    pass
+            self._reset_blink_ui()
             return
-        color = '#ffd700' if self._blink_state else BG
-        try:
-            self._active_blink_frame.configure(bg=color)
-        except Exception:
-            pass
+        if self._blink_state:
+            try:
+                self._active_blink_frame.configure(
+                    highlightbackground='#ffd700', highlightthickness=4)
+            except Exception:
+                pass
+            try:
+                if self._active_blink_btn:
+                    self._active_blink_btn.configure(bg='#ffd700', fg='#1a1a2e')
+            except Exception:
+                pass
+        else:
+            try:
+                self._active_blink_frame.configure(
+                    highlightbackground=BG, highlightthickness=4)
+            except Exception:
+                pass
+            try:
+                if self._active_blink_btn:
+                    self._active_blink_btn.configure(bg=START_BG, fg='white')
+            except Exception:
+                pass
         self._blink_state = not self._blink_state
         self._blink_job = self.root.after(400, self._do_blink)
+
+    def _reset_blink_ui(self):
+        try:
+            if self._active_blink_frame:
+                self._active_blink_frame.configure(
+                    highlightbackground=BG, highlightthickness=0)
+        except Exception:
+            pass
+        try:
+            if self._active_blink_btn:
+                self._active_blink_btn.configure(bg=START_BG, fg='white')
+        except Exception:
+            pass
 
     def _stop_blink(self):
         if self._blink_job:
             self.root.after_cancel(self._blink_job)
             self._blink_job = None
-        if self._active_blink_frame:
-            try:
-                self._active_blink_frame.configure(bg=BG)
-            except Exception:
-                pass
+        self._reset_blink_ui()
         self._active_blink_frame = None
+        self._active_blink_btn = None
 
     # ── 매크로 유틸 ─────────────────────────────────────────────
 
