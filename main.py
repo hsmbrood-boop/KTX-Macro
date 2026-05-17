@@ -182,7 +182,7 @@ class KTXMacroApp:
         extra = [(4, 1, 'b9', 'b9')]
 
         for i, (label, cmd, items) in enumerate(groups):
-            border_f = tk.Frame(gf, bg=BG, padx=2, pady=2)
+            border_f = tk.Frame(gf, bg=BG, padx=5, pady=5)
             border_f.grid(row=i * 2, column=0, rowspan=2, padx=4, pady=6, sticky='nsew')
             btn = tk.Button(border_f, text=label,
                             font=('Malgun Gothic', 10, 'bold'),
@@ -408,17 +408,25 @@ class KTXMacroApp:
         self._set_status('매크로 종료됨')
 
     def _start_blink(self):
+        if self._blink_job:
+            self.root.after_cancel(self._blink_job)
+            self._blink_job = None
         self._blink_state = True
         self._do_blink()
 
     def _do_blink(self):
         if not self._macro_running or self._active_blink_frame is None:
+            if self._active_blink_frame:
+                try:
+                    self._active_blink_frame.configure(bg=BG)
+                except Exception:
+                    pass
             return
         color = '#ffd700' if self._blink_state else BG
         try:
             self._active_blink_frame.configure(bg=color)
         except Exception:
-            return
+            pass
         self._blink_state = not self._blink_state
         self._blink_job = self.root.after(400, self._do_blink)
 
@@ -593,6 +601,7 @@ class KTXMacroApp:
                     time.sleep(0.5)
                 self._stop_sound()
                 self._macro_running = False
+                self.root.after(0, self._stop_blink)
                 self._set_status('소리 재생 완료')
                 return
             else:
@@ -722,6 +731,7 @@ class KTXMacroApp:
                 self._set_status('b3 감지 → 소리 재생!')
                 self._play_sound_loop()
                 self._macro_running = False
+                self.root.after(0, self._stop_blink)
                 self._set_status('매크로 종료')
                 return
             else:
