@@ -18,7 +18,12 @@ try:
 except ImportError:
     PIL_AVAILABLE = False
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+if getattr(sys, 'frozen', False):
+    BASE_DIR = os.path.dirname(sys.executable)          # exe 폴더 (유저 파일)
+    BUNDLE_DIR = getattr(sys, '_MEIPASS', BASE_DIR)     # _internal/ (번들 파일)
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    BUNDLE_DIR = BASE_DIR
 
 pygame.mixer.init()
 
@@ -37,10 +42,11 @@ CAP_BG    = "#1a3050"
 
 
 def find_image_file(prefix):
-    for ext in ('png', 'jpg', 'jpeg', 'bmp'):
-        p = os.path.join(BASE_DIR, f'{prefix}.{ext}')
-        if os.path.exists(p):
-            return p
+    for search_dir in (BASE_DIR, BUNDLE_DIR):
+        for ext in ('png', 'jpg', 'jpeg', 'bmp'):
+            p = os.path.join(search_dir, f'{prefix}.{ext}')
+            if os.path.exists(p):
+                return p
     return None
 
 
@@ -451,6 +457,8 @@ class KTXMacroApp:
 
     def _play_sound_loop(self):
         s1 = os.path.join(BASE_DIR, 's1.mp3')
+        if not os.path.exists(s1):
+            s1 = os.path.join(BUNDLE_DIR, 's1.mp3')
         if not os.path.exists(s1):
             self._set_status('s1.mp3 파일 없음!')
             return
