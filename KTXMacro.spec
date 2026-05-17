@@ -15,7 +15,7 @@ datas += _extra
 
 
 a = Analysis(
-    ['main.pyw'],
+    ['main.py'],
     pathex=[],
     binaries=binaries,
     datas=datas,
@@ -45,7 +45,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='i1.ico',
+    icon=None,
 )
 coll = COLLECT(
     exe,
