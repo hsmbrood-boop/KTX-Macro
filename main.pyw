@@ -161,7 +161,7 @@ class KTXMacroApp:
     def __init__(self, root):
         self.root = root
         self.root.title("KTX 자동 예매 매크로")
-        self.root.geometry("630x720")
+        self.root.geometry("630x720+0+0")
         self.root.resizable(False, False)
         self.root.configure(bg=BG)
         self.root.attributes("-topmost", True)
@@ -189,6 +189,7 @@ class KTXMacroApp:
         self._build_stop_button()
         self._sep()
         self._build_log()
+        self._build_footer()
 
     def _sep(self):
         tk.Frame(self.root, bg=SEP, height=1).pack(fill="x")
@@ -199,9 +200,6 @@ class KTXMacroApp:
         tk.Label(f, text="KTX 자동 예매 매크로",
                  font=("Malgun Gothic", 16, "bold"),
                  bg=HEADER_BG, fg=TITLE_FG).pack()
-        tk.Label(f, text="수서발 고속철도 자동화 프로그램",
-                 font=("Malgun Gothic", 9),
-                 bg=HEADER_BG, fg=SUB_FG).pack()
 
     def _build_status(self):
         f = tk.Frame(self.root, bg=BG, pady=7)
@@ -302,6 +300,22 @@ class KTXMacroApp:
             relief="flat", cursor="hand2", height=2,
             command=self.stop_macro,
         ).pack(fill="x")
+
+    def _build_footer(self):
+        f = tk.Frame(self.root, bg=BG, pady=6)
+        f.pack(fill="x")
+        cv = tk.Canvas(f, bg=BG, highlightthickness=0, height=42, width=370)
+        cv.pack()
+        x1, y1, x2, y2, r = 2, 2, 368, 40, 14
+        pts = [
+            x1+r, y1,  x2-r, y1,  x2-r, y1,  x2, y1,
+            x2, y1+r,  x2, y2-r,  x2, y2-r,  x2, y2,
+            x2-r, y2,  x1+r, y2,  x1+r, y2,  x1, y2,
+            x1, y2-r,  x1, y1+r,  x1, y1+r,  x1, y1,
+        ]
+        cv.create_polygon(pts, smooth=True, fill="white", outline="#cc2222", width=4)
+        cv.create_text(185, 21, text="Developed by HSM of Orc Holdings.",
+                       font=("Malgun Gothic", 11, "bold"), fill="#111111")
 
     def _build_log(self):
         f = tk.Frame(self.root, bg=HEADER_BG, padx=12, pady=8)
@@ -460,10 +474,6 @@ class KTXMacroApp:
 
     # ── 공통 유틸 ────────────────────────────────────────────────
     def _press_f5(self):
-        if self._region:
-            x, y, w, h = self._region
-            pyautogui.click(x + w // 2, y + 2)
-            time.sleep(0.1)
         pyautogui.press("f5")
 
     def _stop_sound(self):
@@ -518,12 +528,25 @@ class KTXMacroApp:
                 return None
             return cv2.imread(p, cv2.IMREAD_COLOR)
 
+        def load_opt(prefix):
+            p = find_image_file(prefix)
+            return cv2.imread(p, cv2.IMREAD_COLOR) if p else None
+
         t1 = load("b1"); t2 = load("b2"); t3 = load("b3")
         t4 = load("b4"); t5 = load("b5")
         if any(t is None for t in (t1, t2, t3, t4, t5)):
             return
 
         while self._macro_running:
+            self._set_status("b5 탐색 중... (전체화면)")
+            pos10 = self._match(t5)
+            if pos10:
+                self._set_status("b5 발견 → 클릭!")
+                pyautogui.click(pos10[0], pos10[1])
+                time.sleep(0.5)
+            else:
+                self._set_status("b5 없음 → 건너뜀")
+
             while self._macro_running:
                 self._set_status("b1 탐색 중... (범위)")
                 pos = self._match(t1, region)
@@ -540,6 +563,7 @@ class KTXMacroApp:
                         self._set_status("b5 감지 → 로딩 완료")
                         break
                     time.sleep(0.3)
+                break
 
             if not self._macro_running:
                 break
@@ -581,6 +605,11 @@ class KTXMacroApp:
 
             self._set_status("b3 탐색 중... (전체화면)")
             pos = self._match(t3)
+            if not pos:
+                self._set_status("b3 없음 → 5초 후 재탐색")
+                time.sleep(5.0)
+                self._set_status("b3 재탐색 중... (전체화면)")
+                pos = self._match(t3)
             if pos:
                 self._set_status("b3 감지 → 소리 재생 중... (5분)")
                 self._play_sound_loop()
@@ -627,6 +656,15 @@ class KTXMacroApp:
         t7 = load_opt("b7"); t8 = load_opt("b8"); t9 = load_opt("b9")
 
         while self._macro_running:
+            self._set_status("b5 탐색 중... (전체화면)")
+            pos10 = self._match(t5)
+            if pos10:
+                self._set_status("b5 발견 → 클릭!")
+                pyautogui.click(pos10[0], pos10[1])
+                time.sleep(0.5)
+            else:
+                self._set_status("b5 없음 → 건너뜀")
+
             found_b7 = False
 
             while self._macro_running:
@@ -657,6 +695,7 @@ class KTXMacroApp:
                         self._set_status("b5 감지 → 로딩 완료")
                         break
                     time.sleep(0.3)
+                break
 
             if not self._macro_running:
                 break
@@ -683,6 +722,15 @@ class KTXMacroApp:
                 time.sleep(0.2)
                 pyautogui.click(pos[0], pos[1])
                 time.sleep(0.5)
+                self._set_status("b4 확인 중... (b8 후)")
+                pos4 = self._match(t4)
+                if pos4:
+                    self._set_status("b4 발견 → 클릭!")
+                    time.sleep(0.2)
+                    pyautogui.click(pos4[0], pos4[1])
+                    time.sleep(0.5)
+                else:
+                    self._set_status("b4 없음 → 건너뜀")
                 self._set_status("b9 탐색 중... (전체화면)")
                 pos9 = self._match(t9) if t9 is not None else None
                 if pos9:
@@ -691,6 +739,11 @@ class KTXMacroApp:
                     time.sleep(0.5)
                 self._set_status("b3 탐색 중... (전체화면)")
                 pos = self._match(t3)
+                if not pos:
+                    self._set_status("b3 없음 → 5초 후 재탐색")
+                    time.sleep(5.0)
+                    self._set_status("b3 재탐색 중... (전체화면)")
+                    pos = self._match(t3)
                 if pos:
                     self._set_status("b3 감지 → 소리 재생 중... (5분)")
                     self._play_sound_loop()
@@ -755,6 +808,11 @@ class KTXMacroApp:
 
             self._set_status("b3 탐색 중... (전체화면)")
             pos = self._match(t3)
+            if not pos:
+                self._set_status("b3 없음 → 5초 후 재탐색")
+                time.sleep(5.0)
+                self._set_status("b3 재탐색 중... (전체화면)")
+                pos = self._match(t3)
             if pos:
                 self._set_status("b3 감지 → 소리 재생 중... (5분)")
                 self._play_sound_loop()
