@@ -11,6 +11,7 @@ datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 # 사운드 및 미리보기 이미지 번들
 _extra = [('s1.mp3', '.')]
 _extra += [(f, '.') for f in _glob.glob('s*.png')]
+_extra += [(f, '.') for f in _glob.glob('b*.png')]
 datas += _extra
 
 
@@ -45,7 +46,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=None,
+    icon='i1.ico',
 )
 coll = COLLECT(
     exe,

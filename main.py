@@ -636,12 +636,17 @@ class KTXMacroApp:
                 self._set_status('b4 재발견 → 클릭!')
                 pyautogui.click(pos4[0], pos4[1])
 
-            # b3 탐색: 즉시 → 5초 후 재탐색
+            # b3 탐색: 즉시 → 2초 후 재탐색 → 3초 후 재탐색
             self._set_status('b3 탐색 중... (전체화면)')
             pos = self._match(t3)
             if not pos:
-                self._set_status('b3 없음 → 5초 후 재탐색')
-                time.sleep(5.0)
+                self._set_status('b3 없음 → 2초 후 재탐색')
+                time.sleep(2.0)
+                self._set_status('b3 재탐색 중... (전체화면)')
+                pos = self._match(t3)
+            if not pos:
+                self._set_status('b3 없음 → 3초 후 재탐색')
+                time.sleep(3.0)
                 self._set_status('b3 재탐색 중... (전체화면)')
                 pos = self._match(t3)
 
@@ -767,12 +772,17 @@ class KTXMacroApp:
                     self._set_status('b9 발견 → 클릭!')
                     pyautogui.click(pos9[0], pos9[1])
 
-                # b3 탐색: 즉시 → 5초 후 재탐색
+                # b3 탐색: 즉시 → 2초 후 재탐색 → 3초 후 재탐색
                 self._set_status('b3 탐색 중... (전체화면)')
                 pos = self._match(t3)
                 if not pos:
-                    self._set_status('b3 없음 → 5초 후 재탐색')
-                    time.sleep(5.0)
+                    self._set_status('b3 없음 → 2초 후 재탐색')
+                    time.sleep(2.0)
+                    self._set_status('b3 재탐색 중... (전체화면)')
+                    pos = self._match(t3)
+                if not pos:
+                    self._set_status('b3 없음 → 3초 후 재탐색')
+                    time.sleep(3.0)
                     self._set_status('b3 재탐색 중... (전체화면)')
                     pos = self._match(t3)
 
@@ -816,7 +826,7 @@ class KTXMacroApp:
                 self._set_status('b2 발견 → 클릭!')
                 pyautogui.click(pos[0], pos[1])
 
-                # b4 재확인
+                # b4 재확인 (있으면 클릭, 없으면 그냥 진행)
                 self._set_status('b4 재확인 중...')
                 pos4 = self._match(t4)
                 if pos4:
@@ -824,23 +834,19 @@ class KTXMacroApp:
                     pyautogui.click(pos4[0], pos4[1])
                     time.sleep(0.2)
                 else:
-                    self._set_status('b4 재확인 미발견 → F5 후 재시작')
-                    self._press_f5()
-                    time.sleep(1.0)
-                    self._set_status('b5 대기 중... (재시작 로딩)')
-                    while self._macro_running:
-                        pos10 = self._match(t5)
-                        if pos10:
-                            break
-                        time.sleep(0.3)
-                    continue
+                    self._set_status('b4 없음 → 그냥 진행')
 
-                # b3 탐색: 즉시 → 5초 후 재탐색
+                # b3 탐색: 즉시 → 2초 후 재탐색 → 3초 후 재탐색
                 self._set_status('b3 탐색 중... (전체화면)')
                 pos = self._match(t3)
                 if not pos:
-                    self._set_status('b3 없음 → 5초 후 재탐색')
-                    time.sleep(5.0)
+                    self._set_status('b3 없음 → 2초 후 재탐색')
+                    time.sleep(2.0)
+                    self._set_status('b3 재탐색 중... (전체화면)')
+                    pos = self._match(t3)
+                if not pos:
+                    self._set_status('b3 없음 → 3초 후 재탐색')
+                    time.sleep(3.0)
                     self._set_status('b3 재탐색 중... (전체화면)')
                     pos = self._match(t3)
 
